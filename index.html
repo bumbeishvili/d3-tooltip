@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tooltip </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" type="image/png" href="assets/fav.png" />
+  <meta property="og:title" content="D3 Tooltip" />
+  <meta property="og:description" content="Usage made easy" />
+  <meta property="og:image" content="https://bumbeishvili.github.io/d3-tooltip/assets/share.png" />
+  <style>
+    body {
+      font-family: "Helvetica"
+    }
+  </style>
+</head>
+
+<body translate="no">
+  <a href="https://github.com/bumbeishvili/d3-tooltip">
+    <img style="position:fixed;top:0;right:0;border:0;z-index:2;" width="149" height="149" src="forkme.png" alt="Fork me on GitHub">
+  </a>
+  <div class="container centered">
+    <div id="myGraph"></div>
+  </div>
+  <div>
+    <textarea>
+        //just edit tooltips's default options here and see result above
+        tooltip = d3.componentsTooltip()
+        .container('.svg-element')
+        .rows([
+          {
+            left: "default id",
+            right: "{id}"
+          },
+          {
+            left: "default value",
+            right: "{value}"
+          },
+        ])
+      
+        // show tooltip
+        tooltip
+        .x(100)
+        .y(100)
+        .show({id:1,value:"some value",name:"some large name"})
+    </textarea>
+  </div>
+  <script src="libs/d3.v4.min.js"></script>
+  <script src="libs/codemirror.js"></script>
+  <script src="libs/javascript.js"></script>
+  <LINK REL=StyleSheet HREF="libs/codemirror.css" TYPE="text/css">
+  <script src="tooltip.js"></script>
+  <script>
+    //initialize code editor
+    var myCodeMirror = CodeMirror.fromTextArea(
+      document.getElementsByTagName('textarea')[0],
+      {
+        lineNumbers: true,
+        mode: "javascript",
+        matchBrackets: true,
+      }
+    );
+
+    myCodeMirror.on("change", function (cm, change, text) {
+      var value = myCodeMirror.getValue();
+      eval(value)
+    });
+  </script>
+
+  <script>
+
+    var svg = d3.select('#myGraph')
+      .append('svg')
+      .attr('width', 500)
+      .attr('class', 'svg-element')
+      .attr('height', 400)
+      .style('overflow', 'visible');
+
+    //initialize
+    var tooltip = d3.componentsTooltip()
+      .container('.svg-element')
+      .rows([
+        {
+          left: "default id",
+          right: "{id}"
+        },
+        {
+          left: "default value",
+          right: "{value}"
+        },
+      ])
+
+
+
+
+
+    var topY = 230;
+
+
+    svg.append('text').text('Hover to see :)').attr('y', 200).attr('x', 100)
+    svg.selectAll('rect')
+      .data(d3.range(100).map(d => d - 1))
+      .enter()
+      .append('rect')
+      .attr('fill', 'aqua')
+      .attr('width', 20)
+      .attr('height', 20)
+      .attr('y', (d, i) => {
+        return topY + 21 * Math.floor(i / 25);
+      })
+      .attr('x', (d, i) => {
+        return 100 + (i % 25) * 21;
+      })
+      .on('mouseenter', function (d, i) {
+
+        d3.select(this)
+          .attr('fill', 'orange');
+
+        var item = d3.select(this);
+        var x = +item.attr('x') + 10;
+        var y = +item.attr('y');
+
+        tooltip
+          .x(x)
+          .y(y)
+          .show(d)
+
+      })
+      .on('mouseleave', function (d) {
+        svg.selectAll('rect').attr('fill', 'aqua')
+        tooltip.hide();
+      })
+
+
+
+
+  </script>
+
+
+</body>
+
+</html>
