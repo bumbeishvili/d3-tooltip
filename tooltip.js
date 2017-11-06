@@ -7,16 +7,11 @@ https://github.com/bumbeishvili/d3-coding-conventions/blob/84b538fa99e43647d0d47
 
 */
 
-
 d3.componentsTooltip = function d3ComponentsTooltip(params) {
   // exposed variables
   var attrs = {
-    svgWidth: 400,
+    svgWidth: 0,
     svgHeight: 400,
-    marginTop: 5,
-    marginBottom: 5,
-    marginRight: 5,
-    marginLeft: 5,
     container: 'body',
     tooltipRowHeight: 25,
     minSpaceBetweenColumns: 50,
@@ -29,16 +24,16 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
     tooltipFill: "white",
     leftMargin: 10,
     rightMargin: 3,
-    rows: [
+    content: [
       {
-        left: "default id",
+        left: "info",
         right: "{id}"
       },
     ],
     x: null,
     y: null,
     direction: "bottom",
-    data: null
+    data: { "id": "you should provide data using .show(d)" }
   };
 
   /*############### IF EXISTS OVERWRITE ATTRIBUTES FROM PASSED PARAM  #######  */
@@ -61,10 +56,6 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
 
       //calculated properties
       var calc = {}
-      calc.chartLeftMargin = attrs.marginLeft;
-      calc.chartTopMargin = attrs.marginTop;
-      calc.chartWidth = attrs.svgWidth - attrs.marginRight - calc.chartLeftMargin;
-      calc.chartHeight = attrs.svgHeight - attrs.marginBottom - calc.chartTopMargin;
 
       //drawing containers
       var container = d3.select(this);
@@ -74,7 +65,6 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
 
       //add container g element
       var chart = svg.patternify({ tag: 'g', selector: 'chart' })
-        .attr('transform', 'translate(' + (calc.chartLeftMargin) + ',' + calc.chartTopMargin + ')');
 
       // Add filters ( Shadows)
       var defs = chart.patternify({ selector: 'defs-element', tag: 'defs' })
@@ -90,49 +80,47 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
       feMerge.patternify({ selector: 'feMergeNode-element', tag: 'feMergeNode' }).attr("in", "offsetBlur")
       feMerge.patternify({ selector: 'feMergeNode2-element', tag: 'feMergeNode' }).attr("in", "SourceGraphic");
 
-
-      hideTooltip = function (){
+      // hide tooltip
+      hideTooltip = function () {
         attrs.container.selectAll(".tooltipContent").remove();
       }
+
+      //show tooltip
       displayTooltip = function () {
-        var params = attrs;
-        var isDisplayed = true;
+
+        // assign x and y positions
         var x = attrs.x;
         var y = attrs.y;
-        var hoveredElement = { value: "test1", totalValue: "test2", id: "test3" };
-        var filterUrl = attrs.dropShadowUrl;
-        var direction = attrs.direction;
-
-
 
         //check container type first and transform if necessary
         if (!(attrs.container instanceof d3.selection)) {
           attrs.container = d3.select(attrs.container);
         }
 
-
+        // remove tooltipcontent if exists
         attrs.container.selectAll(".tooltipContent").remove();
 
-        if (!isDisplayed) {
-          return;
-        }
-
+        // tooltip content wrapper
         var tooltipContentWrapper = attrs.container
           .append("g")
           .attr("class", "tooltipContent")
           .attr("pointer-events", "none");
 
+        //tooltip wrapper
         var tooltipWrapper = tooltipContentWrapper
           .append("g")
           .style("pointer-events", "none");
 
+        //tooltip path
         tooltipWrapper.append("path");
 
+        //row contents wrapper
         var g = tooltipWrapper.append("g");
 
+        //each rows wrapper
         var rows = g
           .selectAll(".rows")
-          .data(attrs.rows)
+          .data(attrs.content)
           .enter()
           .append("g")
           .attr("font-size", attrs.fontSize)
@@ -147,21 +135,25 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
             attrs.contentMargin})`
           );
 
+        //row left texts
         rows
           .append("text")
           .attr("class", "left")
           .attr("y", attrs.tooltipRowHeight / 3)
           .attr("x", attrs.leftMargin)
-          .text(d => replaceWithProps(d.left, hoveredElement))
+          .text(d => replaceWithProps(d.left, attrs.data))
           .attr("text-anchor", "start");
+
+        //row right texts
         rows
           .append("text")
           .attr("class", "right")
           .attr("y", attrs.tooltipRowHeight / 3)
           .attr("x", attrs.rightMargin)
-          .text(d => replaceWithProps(d.right, hoveredElement))
+          .text(d => replaceWithProps(d.right, attrs.data))
           .attr("text-anchor", "end");
 
+        // adjusting positions
         var maxWidth = 0;
         rows.each(function (g) {
           var row = d3.select(this);
@@ -169,18 +161,19 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
             row.select(".left").node().getBoundingClientRect().width +
             row.select(".right").node().getBoundingClientRect().width +
             attrs.minSpaceBetweenColumns;
-
           if (currentWidth > maxWidth) {
             maxWidth = currentWidth;
           }
         });
 
+        // taking right texts to maximum left width position
         rows.select(".right").attr("x", maxWidth);
 
+        //applying margins
         maxWidth += attrs.leftMargin + attrs.rightMargin;
 
-        var height =
-          attrs.tooltipRowHeight * attrs.rows.length +
+        //calculating positions
+        var height = attrs.tooltipRowHeight * attrs.content.length +
           attrs.contentMargin * 2 -
           attrs.heightOffset +
           attrs.tooltipRowHeight / 3;
@@ -189,46 +182,27 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
         var fullWidth = maxWidth;
         var halfHeight = height / 2;
 
-        var strPath = `M 0 0 
+        //building string paths
 
-                ${direction != "left"
-            ? ""
-            : `  L 0 ${halfHeight - halfArrowLength}
-                       L   ${-attrs.arrowHeight} ${halfHeight}
-                       L 0 ${halfHeight + halfArrowLength}  `}
+        var leftArrowPos = attrs.direction != "left" ? "" : `  L 0 ${halfHeight - halfArrowLength}   L   ${-attrs.arrowHeight} ${halfHeight} L 0 ${halfHeight + halfArrowLength}`
+        var bottomArrowPos = attrs.direction != "bottom" ? "" : ` L ${halfWidth - halfArrowLength}  ${height}  L ${halfWidth} ${height + attrs.arrowHeight}  L ${halfWidth + halfArrowLength} ${height}`
+        var rightArrowPos = attrs.direction != "right" ? "" : ` L ${fullWidth} ${halfHeight - halfArrowLength}   L  ${fullWidth + attrs.arrowHeight} ${halfHeight}    L ${fullWidth} ${halfHeight + halfArrowLength}  `
+        var topArrowPos = attrs.direction != "top" ? "" : `L ${halfWidth + halfArrowLength} 0  L ${halfWidth} ${-attrs.arrowHeight}   L ${halfWidth - halfArrowLength}  0   `
 
-                L 0  ${height} 
-                
-                ${direction != "bottom"
-            ? ""
-            : ` L ${halfWidth - halfArrowLength}  ${height} 
-                                        L ${halfWidth} ${height +
-            attrs.arrowHeight} 
-                                        L ${halfWidth +
-            halfArrowLength} ${height}`}
-               
-                L ${fullWidth} ${height}  
 
-               ${direction != "right"
-            ? ""
-            : ` L ${fullWidth} ${halfHeight - halfArrowLength}
-                                    L  ${fullWidth +
-            attrs.arrowHeight} ${halfHeight}
-                                    L ${fullWidth} ${halfHeight +
-            halfArrowLength}  `}
+        var strPath = `
+          M 0 0 
+          ${leftArrowPos}
+          L 0  ${height}
+          ${bottomArrowPos}
+          L ${fullWidth} ${height} 
+          ${rightArrowPos} 
+          L ${fullWidth} 0 
+          ${topArrowPos}
+          L 0 0 `;
 
-                
-                L ${fullWidth} 0 
-                
-                ${direction != "top"
-            ? ""
-            : `L ${halfWidth + halfArrowLength} 0  
-                                      L ${halfWidth} ${-attrs.arrowHeight} 
-                                      L ${halfWidth - halfArrowLength}  0 
-                                     `}
 
-                 L 0 0 `;
-
+        // tooltip translation configurations
         var tooltipTranslateConfig = {
           left: {
             x: halfWidth + attrs.arrowHeight,
@@ -248,101 +222,29 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
           }
         };
 
-        // if(y < 0)
-        // {
+        // translate tooltip content based on configuration
         tooltipContentWrapper.attr(
           "transform",
-          `translate(${+x + +tooltipTranslateConfig[direction].x},${y +
-          tooltipTranslateConfig[direction].y})`
+          `translate(${+x + +tooltipTranslateConfig[attrs.direction].x},${y +
+          tooltipTranslateConfig[attrs.direction].y})`
         );
         // }
 
+        //appending actual path
         tooltipWrapper
           .select("path")
-          .attr(
-          "d",
-          `M 0 0  
-                L 0 100 
-                L 121 99 
-                L 143 132 
-                L 165 99 
-                L 300 100 
-                L 300 0 
-                L 0 0 `
-          )
           .attr("d", strPath)
           .attr("fill", attrs.tooltipFill)
-          .attr("filter", `url(#${filterUrl})`);
+          .attr("filter", `url(#${attrs.dropShadowUrl})`);
 
-        //wrapper polyline
-
-        tooltipWrapper
-
-          .append("polyline") // attach a polyline
-          .style('display', 'none')
-          .style("stroke", "black") // colour the line
-          .style("fill", "none") // remove any fill colour
-          .attr(
-          "points",
-          `
-
-                ${direction != "left"
-            ? ""
-            : `  0 ${halfHeight - halfArrowLength}
-                       ${-attrs.arrowHeight} ${halfHeight}
-                        0 ${halfHeight + halfArrowLength}  `}
-
-                
-
-                     0,${height}, 
-                             ${direction != "bottom"
-            ? ""
-            : `  ${halfWidth - halfArrowLength}  ${height} 
-                                                     ${halfWidth} ${height +
-            attrs.arrowHeight} 
-                                                   ${halfWidth +
-            halfArrowLength} ${height}`}
-                     
-
-                     ${fullWidth}, ${height}
-${fullWidth}, ${0}
-${0}, ${0}
-0,${height}
-
-`
-          ); // x,y points
-        // .attr("points", "100,50, 200,150, 300,50");  // x,y points
-        /*
-          rows
-            .append("rect")
-            .attr("width", fullWidth)
-            .attr("height", 1)
-            .attr("x", -attrs.contentMargin)
-            .attr("y", -attrs.heightOffset);
-            */
-
-        /*
-      
-      
-        tooltipWrapper
-          .append("rect")
-          .attr("width", 1)
-          .attr("height", height)
-          .attr("x", fullWidth);
-        tooltipWrapper
-          .append("rect")
-          .attr("width", 1)
-          .attr("height", height)
-          .attr("x", 0);
-          
-          */
-
+        //final translation to match provided x and y position
         tooltipWrapper.attr(
           "transform",
           `translate(${-halfWidth},${-height - attrs.arrowHeight})`
         );
       }
 
+      // function to replace dinamically properties from passed object
       function replaceWithProps(text, obj) {
         var keys = Object.keys(obj);
         keys.forEach(key => {
@@ -357,8 +259,10 @@ ${0}, ${0}
       updateData = function () {
 
       }
+
       //#########################################  UTIL FUNCS ##################################
 
+      // catch scope variables and assign it to global variable for runtime variable inspection
       function debug() {
         if (attrs.isDebug) {
           //stringify func
@@ -433,7 +337,9 @@ ${0}, ${0}
   }
 
   main.show = function (data) {
-    attrs.data = data;
+    if (data) {
+      attrs.data = data;
+    }
     displayTooltip();
   }
 

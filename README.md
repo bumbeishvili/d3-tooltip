@@ -4,8 +4,6 @@
 
 ## screenshot
 ![image](assets/scr.png)
-### History 
-I was tired copying same thing over and over in different projects and decided to create small lib for tooltips :)
 
 ### Highlights
 * Dynamic resizing

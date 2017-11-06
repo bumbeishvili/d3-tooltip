@@ -29,21 +29,21 @@
         //just edit tooltips's default options here and see result above
         tooltip = d3.componentsTooltip()
         .container('.svg-element')
-        .rows([
+        .content([
           {
             left: "default id",
             right: "{id}"
           },
           {
-            left: "default value",
-            right: "{value}"
+            left: "new id",
+            right: "{id}"
           },
         ])
       
         // show tooltip
         tooltip
-        .x(100)
-        .y(100)
+        .x(200)
+        .y(180)
         .show({id:1,value:"some value",name:"some large name"})
     </textarea>
   </div>
@@ -81,14 +81,14 @@
     //initialize
     var tooltip = d3.componentsTooltip()
       .container('.svg-element')
-      .rows([
+      .content([
         {
           left: "default id",
           right: "{id}"
         },
         {
-          left: "default value",
-          right: "{value}"
+          left: "new id",
+          right: "{id}"
         },
       ])
 
@@ -99,7 +99,7 @@
     var topY = 230;
 
 
-    svg.append('text').text('Hover to see :)').attr('y', 200).attr('x', 100)
+    svg.append('text').text('Hover to see :)').attr('y', 200).attr('x', 200)
     svg.selectAll('rect')
       .data(d3.range(100).map(d => d - 1))
       .enter()
@@ -111,7 +111,7 @@
         return topY + 21 * Math.floor(i / 25);
       })
       .attr('x', (d, i) => {
-        return 100 + (i % 25) * 21;
+        return 200 + (i % 25) * 21;
       })
       .on('mouseenter', function (d, i) {
 
@@ -119,13 +119,49 @@
           .attr('fill', 'orange');
 
         var item = d3.select(this);
-        var x = +item.attr('x') + 10;
+        var x = +item.attr('x');
         var y = +item.attr('y');
+        var direction = ["top", "left", "right", "bottom"][Math.floor(i / 25)];
+        switch (direction) {
+          case "bottom": x += 10; break;
+          case "top": y += 25; x += 10; break
+          case "left": x += 25; y += 11; break;
+          case "right": y += 11; break;
+        }
+
+        var obj = {
+          index: d + 1,
+          isEven: d % 2 == 1,
+          isPrime: "I am lazy :)"
+        }
+        var rows = [
+          {
+            left: "Number",
+            right: "{index}"
+          },
+          {
+            left: "Is even",
+            right: "{isEven}"
+          },
+        ]
+        if (i % 5 > 1) {
+          rows.push({ left: "Is prime", right: "{isPrime}" })
+        }
+        if (i % 5 > 2) {
+          rows.push({ left: "Other thing", right: "Other value" })
+        }
+        if (i % 5 > 3) {
+          rows.push({ left: "Again", right: "Other,other value" })
+        }
 
         tooltip
           .x(x)
           .y(y)
-          .show(d)
+          .textColor("white")
+          .tooltipFill(defaultColors[i % defaultColors.length])
+          .direction(direction)
+          .content(rows)
+          .show(obj)
 
       })
       .on('mouseleave', function (d) {
@@ -134,6 +170,14 @@
       })
 
 
+    var defaultColors = ["#c5bf66", "#BF55EC", "#f36a5a", "#EF4836", "#9A12B3", "#c8d046", "#E26A6A",
+      "#32c5d2", "#8877a9", "#ACB5C3", "#e35b5a", "#2f353b", "#e43a45", "#f2784b",
+      "#796799", "#26C281", "#555555", "#525e64", "#8E44AD", "#4c87b9", "#bfcad1",
+      "#67809F", "#578ebe", "#c5b96b", "#4DB3A2", "#e7505a", "#D91E18", "#1BBC9B",
+      "#3faba4", "#d05454", "#8775a7", "#8775a7", "#8E44AD", "#f3c200", "#4B77BE",
+      "#c49f47", "#44b6ae", "#36D7B7", "#94A0B2", "#9B59B6", "#E08283", "#3598dc",
+      "#F4D03F", "#F7CA18", "#22313F", "#2ab4c0", "#5e738b", "#BFBFBF", "#2C3E50",
+      "#5C9BD1", "#95A5A6", "#E87E04", "#29b4b6", "#1BA39C"]
 
 
   </script>
