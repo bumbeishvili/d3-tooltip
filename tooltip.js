@@ -11,7 +11,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
   // exposed variables
   var attrs = {
     svgWidth: 0,
-    svgHeight: 400,
+    svgHeight: 0,
     container: 'body',
     tooltipRowHeight: 25,
     minSpaceBetweenColumns: 50,
@@ -32,7 +32,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
     ],
     x: null,
     y: null,
-    direction: "bottom",
+    direction: "bottom", // left , right, top
     data: { "id": "you should provide data using .show(d)" }
   };
 

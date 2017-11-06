@@ -25,26 +25,39 @@
     <div id="myGraph"></div>
   </div>
   <div>
-    <textarea>
+    <textarea rows=30>
         //just edit tooltips's default options here and see result above
         tooltip = d3.componentsTooltip()
         .container('.svg-element')
         .content([
           {
-            left: "default id",
-            right: "{id}"
+            left: "id",
+            right: "{id} prefix"
           },
           {
-            left: "new id",
-            right: "{id}"
+            left: "name",
+            right: "{name}"
           },
         ])
-      
-        // show tooltip
-        tooltip
-        .x(200)
-        .y(180)
-        .show({id:1,value:"some value",name:"some large name"})
+        .x(400)
+        .y(380)
+        .tooltipRowHeight(25)
+        .minSpaceBetweenColumns(50)
+        .fontSize(13)
+        .arrowHeight(10)
+        .arrowLength(20)
+        .contentMargin(0)
+        .heightOffset(7)
+        .textColor('#2C3E50')
+        .tooltipFill('white')
+        .leftMargin(10)
+        .rightMargin(3)
+        .direction('bottom') // top,left,right
+
+
+// invoke with test data
+      tooltip
+        .show({id:1,value:"some value",name:"Some large name"})
     </textarea>
   </div>
   <script src="libs/d3.v4.min.js"></script>
@@ -62,6 +75,8 @@
         matchBrackets: true,
       }
     );
+
+    myCodeMirror.setSize(700, 700);
 
     myCodeMirror.on("change", function (cm, change, text) {
       var value = myCodeMirror.getValue();
