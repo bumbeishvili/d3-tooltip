@@ -20,7 +20,7 @@
 ```javascript
  var tooltip = d3.componentsTooltip()
         .container('.svg-element')
-        .rows([
+        .content([
           {
             left: "default id",
             right: "{id}"
