@@ -24,6 +24,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
     tooltipFill: "white",
     leftMargin: 10,
     rightMargin: 3,
+    transform: { x: 0, y: 0, k: 1 },
     content: [
       {
         left: "info",
@@ -98,10 +99,17 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
         }
 
         // remove tooltipcontent if exists
-        attrs.container.selectAll(".tooltipContent").remove();
+        attrs.container.selectAll(".total-wrapper").remove();
+
+        console.log(attrs.transform)
+        // tooltip content wrapper
+        var totalWrapper = attrs.container
+          .append("g")
+          .attr("class", "total-wrapper")
+          .attr("transform", ` scale(${1 / attrs.transform.k})`)
 
         // tooltip content wrapper
-        var tooltipContentWrapper = attrs.container
+        var tooltipContentWrapper = totalWrapper
           .append("g")
           .attr("class", "tooltipContent")
           .attr("pointer-events", "none");
@@ -222,13 +230,14 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
           }
         };
 
+        x *= (attrs.transform.k);
+        y *= attrs.transform.k
         // translate tooltip content based on configuration
         tooltipContentWrapper.attr(
           "transform",
           `translate(${+x + +tooltipTranslateConfig[attrs.direction].x},${y +
           tooltipTranslateConfig[attrs.direction].y})`
         );
-        // }
 
         //appending actual path
         tooltipWrapper
