@@ -69,7 +69,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
 
       // Add filters ( Shadows)
       var defs = chart.patternify({ selector: 'defs-element', tag: 'defs' })
-      attrs.dropShadowUrl = "drop-shadow–" + Math.floor(Math.random() * 1000000);
+      attrs.dropShadowUrl = "drop-shadow–d3-components-tooltip";
 
       //Drop shadow filter
       var dropShadowFilter = defs.patternify({ selector: 'filter-element', tag: 'filter' }).attr("id", attrs.dropShadowUrl).attr("height", "150%").attr('y', "-30%");
