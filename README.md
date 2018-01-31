@@ -2,6 +2,9 @@
 
 ## See the [Project Page](https://bumbeishvili.github.io/d3-tooltip/) for interactive example!
 
+
+## See usage example [at this codepen](https://codepen.io/bumbeishvili/pen/WMvNxM?editors=1010)
+
 ## screenshot
 ![image](assets/scr.png)
 
