@@ -50,6 +50,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
   var updateData;
   var displayTooltip;
   var hideTooltip;
+  var dimensions;
 
   //main chart object
   var main = function (selection) {
@@ -190,6 +191,11 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
         var fullWidth = maxWidth;
         var halfHeight = height / 2;
 
+        attrs.dimensions = {
+          height: height,
+          width: fullWidth
+        }
+
         //building string paths
 
         var leftArrowPos = attrs.direction != "left" ? "" : `  L 0 ${halfHeight - halfArrowLength}   L   ${-attrs.arrowHeight} ${halfHeight} L 0 ${halfHeight + halfArrowLength}`
@@ -251,6 +257,7 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
           "transform",
           `translate(${-halfWidth},${-height - attrs.arrowHeight})`
         );
+
       }
 
       // function to replace dinamically properties from passed object
@@ -324,6 +331,10 @@ d3.componentsTooltip = function d3ComponentsTooltip(params) {
 
   //set attrs as property
   main.attrs = attrs;
+
+  main.dimensions = function () {
+    return attrs.dimensions;
+  }
 
   //debugging visuals
   main.debug = function (isDebug) {
